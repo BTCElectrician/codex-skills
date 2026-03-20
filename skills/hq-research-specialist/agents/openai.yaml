@@ -1,0 +1,4 @@
+interface:
+  display_name: "HQ Research Specialist"
+  short_description: "Research web, GitHub, and repo questions for HQ"
+  default_prompt: "Research this for Ohmni HQ, use current sources, and return a concise research packet with findings, sources, confidence, landing targets, and queue-ready next steps."
