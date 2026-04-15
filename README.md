@@ -7,7 +7,7 @@ This folder is a personal vault of Codex skills and agent templates.
 1. Create the folder .codex/skills at the root of the target repo.
 2. Copy a skill folder into it. Example:
 
-   cp -R /Users/collin/Desktop/codex-skills/skills/flask-redundancy-audit /path/to/repo/.codex/skills/
+   cp -R /path/to/codex-skills/skills/flask-redundancy-audit /path/to/repo/.codex/skills/
 
 3. If the skill does not appear, restart Codex CLI or the VS Code extension.
 
