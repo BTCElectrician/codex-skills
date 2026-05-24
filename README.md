@@ -2,6 +2,12 @@
 
 This folder is a personal vault of Codex skills and agent templates.
 
+Agent startup: read `AGENTS.md`, then this `README.md`.
+
+Do not copy secrets, full env backups, private repo data, or target-repo
+credentials into this vault. Skills that mutate target repos or providers
+should only be run when the current task explicitly calls for that workflow.
+
 ## Install a skill in a repo (.codex/skills)
 
 1. Create the folder .codex/skills at the root of the target repo.
