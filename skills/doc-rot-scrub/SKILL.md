@@ -1,21 +1,27 @@
 ---
 name: doc-rot-scrub
-description: Audit and scrub stale AI-era markdown so it stops misleading coding agents — cross-repo "mirror docs", weak-model-era plan/context/briefing files, duplicate doc trees, and stale editor rules (.cursor/rules, .cursorrules, copilot-instructions). Use whenever the user mentions old docs or markdown misleading agents, documentation debt, doc cleanup/audit/scrub, stale or outdated docs, mirror docs, agents trusting the wrong file, or a repo full of old AI-briefing markdown — even if they never say the word "scrub".
+description: Audit and scrub stale AI-era markdown so it stops misleading coding agents — hand-maintained "workflow"/context docs full of extracted functions and file maps, old PRDs and plans, cross-repo "mirror docs", duplicate doc trees, and stale editor rules (.cursor/rules, .cursorrules, copilot-instructions). Use whenever the user mentions old docs or markdown misleading agents or polluting context, an agent going off course from a stale doc, documentation debt, doc cleanup/audit/scrub, mirror docs, old PRDs/context files they used to keep updated by hand, or a repo full of markdown from the early vibe-coding era — even if they never say the word "scrub".
 ---
 
 # Doc-Rot Scrub
 
 ## Why this skill exists
 
-Between 2023 and 2025, people wrote piles of markdown to brief weak AI models:
-architecture narratives, duplicated "how the other repo works" docs, pasted AI
-diagnoses, implementation plans. That habit was correct then — models could
-not hold a codebase, so pre-digested context was load-bearing. Modern agents
-read code directly, but they still treat repo-local markdown as pre-verified
-context. Code fails loudly when it drifts; markdown never does. A confident
-stale doc is cheaper to trust than re-deriving truth, so a capable agent
-propagates the error deep into its plan before contradiction surfaces. The
-scaffolding outlived the construction phase and became a hazard.
+Between 2023 and 2025, people wrote piles of markdown to work around small
+context windows and weak models: hand-maintained "workflow docs" with
+extracted functions and file attributions (updated every few days so the
+agent never had to read the whole codebase), architecture narratives,
+duplicated "how the other repo works" docs, PRDs, pasted AI diagnoses,
+implementation plans. These served the human as much as the agent — external
+working memory, so the operator didn't have to hold the codebase in their
+head either. That habit was correct then; pre-digested context was
+load-bearing. Modern agents read code directly, but they still treat
+repo-local markdown as pre-verified context. Code fails loudly when it
+drifts; markdown never does. The harm is double: outright wrong claims send
+agents off course, and even accurate-but-obsolete docs pollute the context
+window with noise that anchors the agent's plan on a stale map of the
+codebase. The scaffolding outlived the construction phase and became a
+hazard.
 
 This skill finds that rot, proposes dispositions, and executes them safely.
 
@@ -73,7 +79,7 @@ Answer these for each target repo; they decide execution mechanics later:
 3. Do deploy-exclude files (`.funcignore`, `.vercelignore`, package globs)
    already exclude docs? If yes, doc changes carry zero runtime risk there.
 4. Is there a search-hygiene contract (`.rgignore`, archive policy in a docs
-   README)? You must preserve it — see pattern 9 in the reference.
+   README)? You must preserve it — see pattern 10 in the reference.
 5. Does automation consume specific docs (autofix workflows reading a prompt
    file, skills reading an asset map)? Those files are load-bearing.
 6. Is another agent active in the checkout (rule above)?

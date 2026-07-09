@@ -1,6 +1,6 @@
 # Doc-Rot Pattern Catalog
 
-Ten patterns observed in a real four-repo portfolio scrub (2026), ordered
+Eleven patterns observed in real portfolio scrubs (2026), ordered
 roughly by danger. Each entry: what it is, why it misleads agents, how to
 detect it, disposition. "Field note" lines are real (anonymized) findings —
 use them to calibrate how bad things can actually be.
@@ -81,7 +81,39 @@ divergent file into the archive instead of deleting it.
 Field note: three full directories (37 files) were byte-identical duplicates
 of their already-archived twins.
 
-## 5. Weak-model-era briefing artifacts
+## 5. Hand-maintained context packets (the "workflow doc")
+
+The founding artifact of the genre. Docs the operator personally kept
+updated — extracted functions, file-path attributions, key logic — so
+neither the human nor a small-context agent had to hold the whole codebase.
+Updated every few days while the habit lasted; frozen at whatever week it
+stopped. These are the most-trusted, fastest-rotting docs in a repo: they
+contain real code excerpts that WERE true when copied, so they read as
+maximally authoritative, and they name exact functions and files — precisely
+the claims an agent acts on without checking.
+
+Detect:
+```
+rg -l -U '```' docs/ *.md          # docs embedding code blocks
+git log --format=%cs -- <file> | head -15   # update-cadence signature
+```
+The git signature is distinctive: a burst of commits every few days, then
+silence. For each candidate, pull 2–3 of its named file paths and function
+names and check them against the codebase — do the files exist, do the
+functions still live there with those signatures?
+
+Disposition: DELETE, even when partially accurate. The job these docs did —
+compressing the codebase for small context windows — is obsolete; the agent
+should read the code. If a packet contains genuine rationale documented
+nowhere else, extract that one insight into a current doc; never resume
+updating the packet.
+
+Field note: operators describe maintaining these by hand "every two days" as
+a workaround before agents could read a whole codebase and produce a
+believable refactor. Abandoned copies later derailed capable agents, which
+preferred the confident stale excerpt over reading the live source.
+
+## 6. Weak-model-era briefing artifacts
 
 Old implementation plans, "context for the AI" files, pasted chat diagnoses,
 dated week-folders, one-off patch snippets. Correct habit for 2023-24 models;
@@ -99,7 +131,7 @@ the doc records a decision not captured elsewhere).
 Field note: 75–81% of tracked markdown in two repos fell in this bucket,
 including a 749-line pasted AI diagnosis.
 
-## 6. Off-topic squatter content
+## 7. Off-topic squatter content
 
 Bulk-copied corpora that have nothing to do with the repo (research dumps,
 training material) — usually one giant import commit, often with " copy" in
@@ -118,7 +150,7 @@ Field note: a 140-file electrician-research corpus was squatting in a
 serverless-functions repo; 139/140 files were byte-identical to their real
 home, so deletion was safe — but only provably so after the diff.
 
-## 7. Half-finished retirements
+## 8. Half-finished retirements
 
 A previous cleanup added "do not trust this" banners or dropped docs from one
 reading list, but other startup surfaces still cite the same files as
@@ -134,7 +166,7 @@ the same change.
 Field note: a repo's STATUS.md said "do not read the local mirrors" while its
 AGENTS.md — read first — still said "the local mirror is <file>; trust it".
 
-## 8. Stale generated docs with weak regeneration
+## 9. Stale generated docs with weak regeneration
 
 Generated reference docs (schema snapshots, API dumps) where the regen step
 only warns on drift instead of failing, so the file silently falls behind.
@@ -151,7 +183,7 @@ Field note: a "current database schema snapshot" was missing the repo's
 dominant feature of the previous five months because the build step only
 warned on drift.
 
-## 9. Search-hygiene drift (the repo-own ≠ live trap)
+## 10. Search-hygiene drift (the repo-own ≠ live trap)
 
 Repos with an archive policy (".rgignore keeps archival docs out of default
 search") accumulate drift in both directions: stale docs outside the ignore
@@ -172,7 +204,7 @@ Field note: a scrub agent un-ignored an entire conceptual-flow directory
 because the docs were "repo-own"; a PR review bot caught it. The fix restored
 the blanket ignore plus one `!live-map.md` negation.
 
-## 10. Orphaned self-referencing bundles
+## 11. Orphaned self-referencing bundles
 
 Doc clusters that only cite each other — zero inbound links from any agent
 surface or index. Harmless-looking, but they surface in content greps and
