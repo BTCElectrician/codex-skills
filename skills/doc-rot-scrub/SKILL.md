@@ -149,6 +149,8 @@ Trip-wires: <pages builds, guardrail scripts, regen scripts, rgignore contract, 
 - REGENERATE: path — regen command — coupling (build scripts)
 - KEEP (load-bearing, verified): path — why
 - DO-NOT-TOUCH: runtime data / corpus / automation-consumed paths
+- NEW-PATTERN (rot that fits no catalog entry): what you saw — a detection idea — proposed disposition
+- SKILL-GAP (instruction was ambiguous or missing): what you needed — what you improvised
 Counts: total md / documentation-genre vs runtime-data split / stale % / lines to remove (estimate)
 ```
 
@@ -219,3 +221,17 @@ rewriting — and expect the sneakiest findings in `.cursor/rules/`, not in
 already run partial self-triage came in at ~7% confirmed-stale. The number is
 not the point — the surface-cited contradictions are; a repo can be 93%
 clean and still be steering agents wrong from `CLAUDE.md` line 259.
+
+## Improving this skill
+
+Every run is telemetry. The NEW-PATTERN and SKILL-GAP manifest lines exist so
+that each audit — on anyone's repos — feeds the catalog. When reviewing a
+manifest, promote a NEW-PATTERN into `references/rot-patterns.md` only if it
+is recurring (seen in ≥2 repos), dangerous (agents would act on it),
+detectable (a command finds it), and has a disposition distinct from existing
+patterns. Fix SKILL-GAPs in the phase instructions, not by adding rules —
+prefer explaining why over adding MUSTs. Keep the catalog sharp: a pattern
+that stops earning its slot gets merged or cut. The catalog was built from
+one operator's portfolio (solo, 2023–2026 vibe-coding arc); the patterns it
+is most likely missing live in team repos, monorepos, and wiki/Notion-export
+cultures — treat manifests from those environments as the highest-value ore.
