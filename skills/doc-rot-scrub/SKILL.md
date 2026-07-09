@@ -95,17 +95,38 @@ Work in this order; the order is the method:
    surface's mandated reading list. **The danger is not a stale doc existing;
    it is a stale doc being cited from a startup surface.** Priority =
    referenced-from-surface × stale.
-2. **Inventory.** `git ls-files '*.md'` (plus `.mdc` editor rules), count by
+2. **Genre gate.** Before classifying anything, split the inventory into
+   documentation vs runtime data — knowledge corpora, prompt/template assets
+   the pipeline consumes, generated run outputs, product content. Data is not
+   documentation and is out of audit scope; record it under DO-NOT-TOUCH so
+   the split reads as a decision, not an oversight. In corpus-heavy repos
+   (ETL, knowledge-base, content pipelines) this can be a third to half of
+   all markdown, and mis-auditing it as rot is the worst failure this skill
+   can commit.
+3. **Inventory.** `git ls-files '*.md'` (plus `.mdc` editor rules), count by
    directory, capture last-commit date per candidate
    (`git log -1 --format=%cs -- <path>`).
-3. **Classify** against the two axes using the pattern catalog — read
-   `references/rot-patterns.md` for the 10 field patterns with detection
-   commands, dispositions, and real-world field notes.
-4. **Spot-check verification.** For the docs that surfaces DO mandate, verify
+4. **Classify** against the two axes using the pattern catalog — read
+   `references/rot-patterns.md` for the 11 field patterns with detection
+   commands, dispositions, and real-world field notes. Staleness has two
+   distinct signals; weigh both: **calendar staleness** (>6 months untouched
+   AND unreferenced from any surface) and **supersession** (contradicted or
+   replaced by a later doc or strategic pivot, regardless of age — a
+   4-month-old doc describing an abandoned workflow is stale). A superseded
+   doc still cited from a live surface is a FIX, not a silent delete; when
+   supersession cannot be confirmed from inside the repo, FLAG it with the
+   open question instead of guessing.
+5. **Prior self-triage.** If the repo already contains its own hygiene or
+   cleanup doc, treat it as a strong prior AND as evidence: verify its
+   claims, note whether it is itself stale, and fold its unfinished items
+   into the manifest — an open "fix STATUS.md" item that survived a month of
+   commits is itself a finding. Do not defer to it blindly, and do not
+   re-derive from scratch as if it did not exist.
+6. **Spot-check verification.** For the docs that surfaces DO mandate, verify
    2–3 concrete claims each against code: routes, file paths, commands, make
    targets, framework/model names. Report only failures. This is cheap and
    high-signal — it separates "old but true" from "confidently wrong".
-5. For multi-repo scrubs: detect replicated bundles — the same
+7. For multi-repo scrubs: detect replicated bundles — the same
    directory/filenames appearing in several repos at different freshness
    levels is the classic mirror signature (compare `git ls-files` basenames
    across repos).
@@ -116,18 +137,27 @@ Write one manifest file (do not scatter findings). Use exactly this shape:
 
 ```
 # Doc-Rot Audit — <date>
-## <repo> (deploy-on-push: yes/no; execution mechanics: direct|branch+PR|worktree+PR)
+## <repo> (deploy-on-push: yes/no/n-a; execution mechanics: direct|branch+PR|worktree+PR)
 State: <branch, dirty count, active-agent signs>
 Trip-wires: <pages builds, guardrail scripts, regen scripts, rgignore contract, automation-consumed docs>
 - RETIRE (mirror, delete): path — 1-line why — last commit — referenced-from
-- ARCHIVE (unique rationale): path — why unique — target archive path
-- MOVE/DEMOTE (repo-own, stale): path — target
+- DELETE (repo-own stale debris, no archival rationale): path — why — last commit
+- ARCHIVE (unique rationale worth keeping): path — why unique — target archive path
+- MOVE/DEMOTE (repo-own, stale, still worth finding): path — target
 - FIX (surface citations, wrong claims): file — exact claim — verified truth
+- FLAG (cannot disposition from inside the repo): path — the open question for the operator
 - REGENERATE: path — regen command — coupling (build scripts)
 - KEEP (load-bearing, verified): path — why
-- DO-NOT-TOUCH: paths with runtime/CI coupling
-Counts: total md / stale % / lines to remove (estimate)
+- DO-NOT-TOUCH: runtime data / corpus / automation-consumed paths
+Counts: total md / documentation-genre vs runtime-data split / stale % / lines to remove (estimate)
 ```
+
+Manifest conventions: one line per directory or cluster is fine for bulk
+findings — give the file count and the commit-date *range*, not one date.
+When a finding's point is that nothing references it, write
+`referenced-from: none (orphaned)`. When a trip-wire question is mooted by an
+earlier answer (no deploy pipeline exists), record `n/a` rather than skipping
+it silently.
 
 ## Phase 2 — Approval gate
 
@@ -185,4 +215,7 @@ zero functional risk; actively-maintained startup surfaces were mostly
 accurate (~70 claims verified, 2 false) while the rot concentrated in old
 strata and editor-rule files. Expect the scrub to be mostly deletion, not
 rewriting — and expect the sneakiest findings in `.cursor/rules/`, not in
-`docs/`.
+`docs/`. The stale percentage varies hugely: a corpus-heavy repo that had
+already run partial self-triage came in at ~7% confirmed-stale. The number is
+not the point — the surface-cited contradictions are; a repo can be 93%
+clean and still be steering agents wrong from `CLAUDE.md` line 259.
