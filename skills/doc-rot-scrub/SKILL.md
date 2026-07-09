@@ -75,7 +75,9 @@ Answer these for each target repo; they decide execution mechanics later:
 2. Do workflows/scripts read or publish docs? Look for: Pages/site builds fed
    from files under `docs/`, guardrail scripts with hardcoded doc-path
    allowlists, build scripts that regenerate doc files, CI path filters on
-   `docs/**`.
+   `docs/**`. Also grep application source for import/require of paths under
+   `docs/` — a runtime file living in a docs tree is load-bearing at
+   compile/deploy time, and invisible to any markdown-only sweep.
 3. Do deploy-exclude files (`.funcignore`, `.vercelignore`, package globs)
    already exclude docs? If yes, doc changes carry zero runtime risk there.
 4. Is there a search-hygiene contract (`.rgignore`, archive policy in a docs
@@ -95,19 +97,30 @@ Work in this order; the order is the method:
    surface's mandated reading list. **The danger is not a stale doc existing;
    it is a stale doc being cited from a startup surface.** Priority =
    referenced-from-surface × stale.
-2. **Genre gate.** Before classifying anything, split the inventory into
-   documentation vs runtime data — knowledge corpora, prompt/template assets
-   the pipeline consumes, generated run outputs, product content. Data is not
-   documentation and is out of audit scope; record it under DO-NOT-TOUCH so
-   the split reads as a decision, not an oversight. In corpus-heavy repos
-   (ETL, knowledge-base, content pipelines) this can be a third to half of
-   all markdown, and mis-auditing it as rot is the worst failure this skill
-   can commit.
+2. **Genre gate.** Before classifying anything, sort the inventory by
+   intended reader — the freshness contract this skill enforces applies only
+   to agent-facing documentation:
+   - **Agent-facing docs** — in scope; everything below applies to these.
+   - **Runtime data** — corpora, prompt/template assets that pipelines or
+     automation consume, generated outputs, product content. Out of scope;
+     record under DO-NOT-TOUCH. When you conclude a repo has zero
+     runtime-data markdown, state the evidence (which corpus-adjacent
+     directories you checked), not just the absence.
+   - **End-user / external-facing material** — client manuals ("you"-voice,
+     addressed to a named human), GitHub-rendered pages with badges. Zero
+     citations from agent surfaces is *correct* for these, not a rot signal;
+     default KEEP.
+   - **Operator-private notes** (pricing, negotiation, compensation) parked
+     in a shared or client-visible repo — FLAG with the confidentiality
+     dimension named explicitly; relocation is an operator call, not a
+     freshness disposition.
+   In corpus-heavy repos runtime data can be a third to half of all markdown,
+   and mis-auditing it as rot is the worst failure this skill can commit.
 3. **Inventory.** `git ls-files '*.md'` (plus `.mdc` editor rules), count by
    directory, capture last-commit date per candidate
    (`git log -1 --format=%cs -- <path>`).
 4. **Classify** against the two axes using the pattern catalog — read
-   `references/rot-patterns.md` for the 11 field patterns with detection
+   `references/rot-patterns.md` for the 12 field patterns with detection
    commands, dispositions, and real-world field notes. Staleness has two
    distinct signals; weigh both: **calendar staleness** (>6 months untouched
    AND unreferenced from any surface) and **supersession** (contradicted or
@@ -220,7 +233,10 @@ rewriting — and expect the sneakiest findings in `.cursor/rules/`, not in
 `docs/`. The stale percentage varies hugely: a corpus-heavy repo that had
 already run partial self-triage came in at ~7% confirmed-stale. The number is
 not the point — the surface-cited contradictions are; a repo can be 93%
-clean and still be steering agents wrong from `CLAUDE.md` line 259.
+clean and still be steering agents wrong from `CLAUDE.md` line 259. A
+three-repo follow-up sweep ranged 7%–30% stale by documentation-genre count;
+the one constant across every repo audited was top-authority surfaces
+(`AGENTS.md`-tier) citing files that no longer exist — check those first.
 
 ## Improving this skill
 

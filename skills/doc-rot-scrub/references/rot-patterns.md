@@ -1,6 +1,6 @@
 # Doc-Rot Pattern Catalog
 
-Eleven patterns observed in real portfolio scrubs (2026), ordered
+Twelve patterns observed in real portfolio scrubs (2026), ordered
 roughly by danger. Each entry: what it is, why it misleads agents, how to
 detect it, disposition. "Field note" lines are real (anonymized) findings —
 use them to calibrate how bad things can actually be.
@@ -25,8 +25,18 @@ repo, or a thin dated boundary contract (interface only, "last verified
 <date>"). Boundary contracts that draw the ownership line WITHOUT narrating
 sibling internals are the healthy replacement — keep those.
 
+Ownership violations also run in a second direction: business, strategy, or
+client-relationship content parked in a product repo when it structurally
+belongs to a control-plane or client-docs layer. Detection is by *subject*,
+not filename — compensation/pricing/negotiation topics, or a directory named
+after the operator — compared by content against the owning layer's tree.
+Same disposition; and when the content is confidential relative to who can
+read the repo, FLAG that dimension explicitly (it outranks freshness).
+
 Field note: 1,500-line "azure function flow" mirrors existed in three repos
 at three different freshness levels; one was still labeled "Current Contract".
+In a client's product repo, the operator's private pricing notes — literally
+opening "Not for <client>" — sat inside the client's own codebase.
 
 ## 2. Replicated bundles across repos
 
@@ -78,8 +88,16 @@ Disposition: DELETE the live copy, keep the archived one — but re-run
 `diff -r` immediately before `git rm`; if any file diverged, `git mv` the
 divergent file into the archive instead of deleting it.
 
+Carve-out: two identical trees are NOT this pattern when the pair is
+intentional — a live surface documents the sync relationship and a checker
+script verifies it. That pair is KEEP-both; deleting one side breaks
+tooling. The distinguishing test: does tooling point at the pair, or is one
+side just an abandoned copy nothing checks?
+
 Field note: three full directories (37 files) were byte-identical duplicates
-of their already-archived twins.
+of their already-archived twins. In another repo, an identical skills tree
+was a deliberate synced pair guarded by `scripts/check_codex_skills.sh` —
+deleting either side would have broken the check.
 
 ## 5. Hand-maintained context packets (the "workflow doc")
 
@@ -166,6 +184,12 @@ the same change.
 Field note: a repo's STATUS.md said "do not read the local mirrors" while its
 AGENTS.md — read first — still said "the local mirror is <file>; trust it".
 
+The same pattern occurs as incomplete coverage: a banner-adding pass that
+caveats four of five sibling docs and misses the fifth, or a reading-list
+purge applied in one surface but not another. Audit retirement passes as
+sets — find the whole genre cluster, then check every member got the same
+treatment.
+
 ## 9. Stale generated docs with weak regeneration
 
 Generated reference docs (schema snapshots, API dumps) where the regen step
@@ -213,12 +237,39 @@ read as authoritative once found.
 Detect: for each cluster member, `rg -uu -l "$(basename <file>)"` — if all
 hits are inside the cluster, it is orphaned.
 
-Disposition: DELETE (lowest risk in the whole catalog — nothing points at
-them). Check the docs index actually never listed them, and clean the index
-if it did.
+Disposition: DELETE — but only after a spot-check. Orphanhood alone is a
+linking signal, not a verdict: an orphan that FAILS its spot-checks is rot
+(delete); an orphan that PASSES them is a linking gap or pending work — see
+pattern 12. Check the docs index actually never listed them, and clean the
+index if it did.
 
 Field note: an eight-file mirror bundle sat quarantined in a legacy folder,
 referenced by nothing but itself, for five months after everyone forgot it.
+
+## 12. Lost-work docs (accurate, unexecuted, orphaned)
+
+The inverse threat of every other pattern: a doc verified CORRECT — an ops
+order, hardening mission list, triage plan — whose described work was never
+finished, and whose pointer trail got severed, often by the very cleanup
+that executed its first mission. Nothing here misleads an agent; instead,
+real pending work (sometimes on money or security surfaces) becomes
+invisible.
+
+Detect: for docs shaped like mission lists (numbered tasks + done-criteria +
+sequencing), grep for each mission's named artifacts — the test files,
+modules, or scripts it says should exist. Executed or not? If partially
+executed AND absent from the current status/next-steps surface, flag it
+regardless of calendar age.
+
+Disposition: FLAG for the operator — never DELETE on orphanhood alone. The
+right fix is usually re-linking the remaining missions from the live status
+surface, or explicitly declaring them dropped.
+
+Field note: a verified-accurate hardening ops order sat orphaned with 3 of 4
+missions unexecuted — including missing behavior tests on payment-webhook
+and row-level-security surfaces. In another repo, an open hygiene issue
+survived a month of commits that touched the exact file it flagged. "Known"
+is not "done", and "accurate" is not "linked".
 
 ---
 
