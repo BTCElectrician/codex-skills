@@ -51,15 +51,24 @@ List only the unresolved questions that materially affect the next move.
 Name where the durable output should go.
 
 Common HQ targets:
+- `artifacts/research/` for immutable raw evidence and scout ingests
+- `docs/research/topics/` for accepted technology, vendor, model, strategy, or general research
 - `docs/clients/<slug>/VERTICAL_RESEARCH.md`
 - `docs/clients/<slug>/DISCOVERY_NOTES.md`
 - `docs/clients/<slug>/CLIENT_BRIEF.md`
 - `docs/clients/<slug>/RAW_AI_NOTES.md` only if useful
+- `ohmni-finance` for canonical finance research and analysis
+- `ohmni-writing` for canonical drafts and content systems
+- private operator storage outside the active repository portfolio for personal
+  reflection and private context; archived REWIRE is deliberate historical
+  provenance only
 - `docs/STATUS.md`
 - `docs/WORK_QUEUE.md`
 - `docs/life/*.md`
 
-If no durable update is needed, say so directly.
+Product behavior and implementation truth belong in the owning repo. Sensitive
+life-admin source records stay outside git. If no durable update is needed, say
+so directly.
 
 ## Suggested Queue Items
 

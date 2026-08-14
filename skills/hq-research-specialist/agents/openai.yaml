@@ -1,4 +1,4 @@
 interface:
   display_name: "HQ Research Specialist"
-  short_description: "Research web, GitHub, and repo questions for HQ"
-  default_prompt: "Research this for Ohmni HQ, use current sources, and return a concise research packet with findings, sources, confidence, landing targets, and queue-ready next steps."
+  short_description: "Route and synthesize cross-domain research for HQ"
+  default_prompt: "Research this for Ohmni HQ, classify the domain, use the strongest appropriate sources and specialist skills only when earned, and return a concise packet with findings, sources, confidence, and the correct landing target."

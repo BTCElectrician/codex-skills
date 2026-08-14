@@ -8,6 +8,16 @@ Do not copy secrets, full env backups, private repo data, or target-repo
 credentials into this vault. Skills that mutate target repos or providers
 should only be run when the current task explicitly calls for that workflow.
 
+## Canonical homes (avoid drift)
+
+Copy-based installs fork silently, so every skill has exactly one canonical
+home, named in its `SOURCE.md`. Skills owned by a repo (e.g.
+`hq-research-specialist` → `ohmni-hq/.codex/skills/`) are only *distributed*
+from this vault: edit the canonical copy, then re-copy it here. Skills with
+no other home (`flask-redundancy-audit`, `flask-redundancy-refactor-p0`,
+`render-env-safe-update`) are canonical in this vault. When installing into a
+repo, keep the skill's `SOURCE.md` so the next agent knows where edits belong.
+
 ## Install a skill in a repo (.codex/skills)
 
 1. Create the folder .codex/skills at the root of the target repo.
