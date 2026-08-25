@@ -1,0 +1,5 @@
+interface:
+  display_name: "Repository Housekeeping"
+  short_description: "Refresh agent instructions and current project state"
+  default_prompt: "Bring this repository's agent instructions and canonical current-state handoff in line with verified live truth."
+

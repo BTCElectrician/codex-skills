@@ -1,6 +1,7 @@
-# Codex Skills Vault
+# Portable Agent Skills
 
-This folder is a personal vault of Codex skills and agent templates.
+Reusable skills and agent templates for Codex, Claude Code, Cursor, and other
+tools that support the open `SKILL.md` Agent Skills format.
 
 Agent startup: read `AGENTS.md`, then this `README.md`.
 
@@ -44,3 +45,24 @@ VS Code extension example:
   Use $flask-redundancy-audit on this repo and write redundancy-audit.md
 
 Note: a restart may be required for new skills to load.
+
+## Repository housekeeping
+
+`repo-housekeeping` performs a bounded closeout after meaningful work. It
+updates operating instructions only when durable rules changed, brings the
+repository's declared status or resume handoff to verified current truth, and
+leaves unrelated dirty work alone.
+
+Invoke it naturally:
+
+```text
+Do the repo housekeeping and bring the agent docs current.
+```
+
+Install the same folder at the project or user skill location supported by
+your agent:
+
+- Codex: `.codex/skills/repo-housekeeping/`
+- Claude Code: `.claude/skills/repo-housekeeping/`
+- Cursor: `.cursor/skills/repo-housekeeping/`; Cursor also discovers Codex and
+  Claude skill directories.
