@@ -64,4 +64,3 @@ Never manufacture a clean closeout from stale prose.
 Report the files changed, the current truth established, validation performed,
 and any remaining blocker. If no durable documentation fact changed, say so and
 leave the files untouched.
-
