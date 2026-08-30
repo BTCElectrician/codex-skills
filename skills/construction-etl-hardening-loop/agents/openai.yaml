@@ -1,0 +1,4 @@
+interface:
+  display_name: "Construction Evidence Hardening"
+  short_description: "Harden cross-trade extraction without parser sprawl"
+  default_prompt: "Use $construction-etl-hardening-loop to repair this construction extraction gap at the earliest faulty layer while preserving model-native, cross-trade behavior."

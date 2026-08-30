@@ -1,0 +1,4 @@
+interface:
+  display_name: "Oracle V3 Review Hardening"
+  short_description: "Synchronize Oracle review truth and workbooks"
+  default_prompt: "Use $oracle-v3-review-workbook-hardening to repair this Oracle V3 review packet and keep source evidence, CSV truth, and workbook output synchronized."
