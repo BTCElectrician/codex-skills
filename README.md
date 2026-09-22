@@ -19,6 +19,18 @@ no other home (`flask-redundancy-audit`, `flask-redundancy-refactor-p0`,
 `render-env-safe-update`) are canonical in this vault. When installing into a
 repo, keep the skill's `SOURCE.md` so the next agent knows where edits belong.
 
+## Maintained shared installations on this workstation
+
+For shared skills listed in `/Users/collin/Desktop/ohmni-hq/ops/skill_sources.json`,
+edit the listed source and use HQ `ops/skills_guard.sh --apply --skill <name>`.
+The default `--check` is read-only. This keeps Codex and Claude installations
+aligned, preserves replaced copies, and refuses unreviewed local edits.
+`render-env-safe-update` is managed this way; its source stays in this vault.
+Prefer global installations for shared skills in future projects. The manual
+copy instructions below are for unregistered or genuinely project-local skills;
+register maintained copies if they need ongoing synchronization. Keep licensed
+third-party overrides private and outside this public vault.
+
 ## Install a skill in a repo (.codex/skills)
 
 1. Create the folder .codex/skills at the root of the target repo.

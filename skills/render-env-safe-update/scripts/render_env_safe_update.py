@@ -69,6 +69,11 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Render API key override (default: RENDER_API_KEY or ~/.render/cli.yaml)",
     )
+    parser.add_argument(
+        "--canonical-env-file",
+        default="",
+        help="Optional local canonical .env restore file used for accurate diff classification",
+    )
     parser.add_argument("--apply", action="store_true", help="Apply updates (default is dry-run)")
     parser.add_argument(
         "--deploy-after",
@@ -80,6 +85,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Print old/new values in diff output (avoid for secrets)",
     )
+    parser.add_argument(
+        "--update-canonical-after-apply",
+        action="store_true",
+        help="Merge applied keys into --canonical-env-file after successful verification",
+    )
     args = parser.parse_args()
 
     if not args.updates:
@@ -90,6 +100,9 @@ def parse_args() -> argparse.Namespace:
 
     if args.full_backup_file and not args.write_full_backup:
         parser.error("--full-backup-file requires --write-full-backup")
+
+    if args.update_canonical_after_apply and not args.canonical_env_file:
+        parser.error("--update-canonical-after-apply requires --canonical-env-file")
 
     return args
 
@@ -112,7 +125,7 @@ def load_render_api_key(explicit_key: str = "") -> str:
 
     text = cfg_path.read_text(encoding="utf-8", errors="ignore")
     for line in text.splitlines():
-        m = re.match(r"^\s*key:\s*(\S+)\s*$", line)
+        m = re.match(r"^\s*(?:key|token):\s*(\S+)\s*$", line)
         if m:
             return m.group(1).strip()
 
@@ -123,7 +136,7 @@ def parse_updates(raw_updates: Iterable[str]) -> Dict[str, str]:
     parsed: Dict[str, str] = {}
     for item in raw_updates:
         if "=" not in item:
-            raise RenderEnvError(f"Invalid --set '{item}' (expected KEY=VALUE)")
+            raise RenderEnvError("Invalid --set (expected KEY=VALUE; input redacted)")
         key, value = item.split("=", 1)
         key = key.strip()
         if not KEY_PATTERN.match(key):
@@ -134,11 +147,38 @@ def parse_updates(raw_updates: Iterable[str]) -> Dict[str, str]:
     return parsed
 
 
+def parse_env_file(path_str: str) -> Dict[str, str]:
+    path = Path(path_str).expanduser().resolve()
+    if not path.exists():
+        raise RenderEnvError(f"Canonical env file not found: {path}")
+
+    env_map: Dict[str, str] = {}
+    for idx, raw_line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            raise RenderEnvError(f"Invalid env line in {path} at line {idx} (content redacted)")
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if not KEY_PATTERN.match(key):
+            raise RenderEnvError(f"Invalid env key {key!r} in {path} at line {idx}")
+        value = value.strip()
+        if value.startswith(("\"", "[")) or value in {"true", "false", "null"}:
+            try:
+                parsed_value = json.loads(value)  # ubs:ignore -- JSONDecodeError handled immediately below
+                value = "" if parsed_value is None else str(parsed_value)
+            except json.JSONDecodeError:
+                pass
+        env_map[key] = value
+    return env_map
+
+
 def api_get_env_vars(api_key: str, service_id: str) -> Dict[str, str]:
     url = f"{API_BASE}/services/{service_id}/env-vars"
     resp = requests.get(url, headers={"Authorization": f"Bearer {api_key}"}, timeout=30)
     if resp.status_code >= 400:
-        raise RenderEnvError(f"GET env vars failed ({resp.status_code}): {resp.text[:300]}")
+        raise RenderEnvError(f"GET env vars failed ({resp.status_code})")
 
     rows = resp.json()
     env_map: Dict[str, str] = {}
@@ -185,17 +225,17 @@ def write_backups(
 def compute_diff(current_env: Dict[str, str], updates: Dict[str, str]) -> Tuple[Dict[str, str], Dict[str, str], Dict[str, str]]:
     unchanged: Dict[str, str] = {}
     changed_existing: Dict[str, str] = {}
-    new_keys: Dict[str, str] = {}
+    missing_from_baseline: Dict[str, str] = {}
 
     for key, new_value in updates.items():
         if key not in current_env:
-            new_keys[key] = new_value
+            missing_from_baseline[key] = new_value
         elif current_env[key] == new_value:
             unchanged[key] = new_value
         else:
             changed_existing[key] = new_value
 
-    return unchanged, changed_existing, new_keys
+    return unchanged, changed_existing, missing_from_baseline
 
 
 def apply_updates(api_key: str, service_id: str, updates: Dict[str, str]) -> None:
@@ -211,7 +251,7 @@ def apply_updates(api_key: str, service_id: str, updates: Dict[str, str]) -> Non
             timeout=30,
         )
         if resp.status_code >= 400:
-            raise RenderEnvError(f"PUT {key} failed ({resp.status_code}): {resp.text[:300]}")
+            raise RenderEnvError(f"PUT {key} failed ({resp.status_code})")
 
 
 def verify_updates(current_env: Dict[str, str], updates: Dict[str, str]) -> None:
@@ -236,24 +276,42 @@ def run_deploy(service_id: str) -> None:
         raise RenderEnvError("Deploy command failed")
 
 
+def write_env_file(path: Path, env_map: Dict[str, str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [f"{k}={json.dumps(v)}" for k, v in sorted(env_map.items())]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    os.chmod(path, 0o600)
+
+
 def print_plan(
     service_id: str,
     backups: BackupPaths,
     unchanged: Dict[str, str],
     changed_existing: Dict[str, str],
-    new_keys: Dict[str, str],
+    missing_from_baseline: Dict[str, str],
+    baseline_env: Dict[str, str],
     current_env: Dict[str, str],
     updates: Dict[str, str],
     show_values: bool,
+    baseline_label: str,
+    baseline_path: Path | None,
+    baseline_warning: str | None,
 ) -> None:
     print(f"service_id: {service_id}")
     print(f"backup_redacted: {backups.redacted_json}")
     if backups.full_env:
         print(f"backup_full: {backups.full_env} (chmod 600)")
+        if baseline_path is None:
+            print("warning: full backup file was written from the Render API snapshot and may be partial")
 
-    print(f"env_count_current: {len(current_env)}")
+    print(f"remote_snapshot_count: {len(current_env)}")
+    print(f"diff_baseline: {baseline_label}")
+    if baseline_path:
+        print(f"diff_baseline_path: {baseline_path}")
+    if baseline_warning:
+        print(f"warning: {baseline_warning}")
     print(f"update_count_requested: {len(updates)}")
-    print(f"update_count_effective: {len(changed_existing) + len(new_keys)}")
+    print(f"update_count_effective: {len(changed_existing) + len(missing_from_baseline)}")
     print(f"unchanged_count: {len(unchanged)}")
 
     if unchanged:
@@ -265,15 +323,17 @@ def print_plan(
         print("changed_existing_keys:")
         for key in sorted(changed_existing):
             if show_values:
-                print(f"  - {key}: {current_env.get(key)!r} -> {changed_existing[key]!r}")
+                print(f"  - {key}: {baseline_env.get(key)!r} -> {changed_existing[key]!r}")
             else:
                 print(f"  - {key}")
 
-    if new_keys:
-        print("new_keys:")
-        for key in sorted(new_keys):
+    if missing_from_baseline:
+        bucket_name = "keys_missing_from_render_snapshot"
+        print(f"{bucket_name}:")
+        for key in sorted(missing_from_baseline):
             if show_values:
-                print(f"  - {key}: <new> -> {new_keys[key]!r}")
+                before = "<not-returned-by-render>"
+                print(f"  - {key}: {before} -> {missing_from_baseline[key]!r}")
             else:
                 print(f"  - {key}")
 
@@ -286,27 +346,40 @@ def main() -> int:
         api_key = load_render_api_key(args.api_key)
 
         current_env = api_get_env_vars(api_key, args.service_id)
+        canonical_env = parse_env_file(args.canonical_env_file) if args.canonical_env_file else None
+        baseline_env = current_env  # Only remote evidence can establish a no-op.
+        baseline_path = (
+            Path(args.canonical_env_file).expanduser().resolve()
+            if args.canonical_env_file
+            else None
+        )
+        baseline_label = "Render API snapshot (canonical file is restore context only)"
+        baseline_warning = "Render GET /env-vars can be partial. Missing keys are unknown; a local canonical file cannot prove current remote values."
         backups = write_backups(
             backup_dir=Path(args.backup_dir).expanduser().resolve(),
             service_id=args.service_id,
             service_name="unknown",
-            current_env=current_env,
+            current_env=canonical_env if canonical_env is not None else current_env,
             write_full_backup=args.write_full_backup,
             full_backup_file=args.full_backup_file,
         )
 
-        unchanged, changed_existing, new_keys = compute_diff(current_env, updates)
-        effective_updates = {**changed_existing, **new_keys}
+        unchanged, changed_existing, missing_from_baseline = compute_diff(baseline_env, updates)
+        effective_updates = {**changed_existing, **missing_from_baseline}
 
         print_plan(
             service_id=args.service_id,
             backups=backups,
             unchanged=unchanged,
             changed_existing=changed_existing,
-            new_keys=new_keys,
+            missing_from_baseline=missing_from_baseline,
+            baseline_env=baseline_env,
             current_env=current_env,
             updates=updates,
             show_values=args.show_values,
+            baseline_label=baseline_label,
+            baseline_path=baseline_path,
+            baseline_warning=baseline_warning,
         )
 
         if not effective_updates:
@@ -321,6 +394,10 @@ def main() -> int:
         apply_updates(api_key, args.service_id, effective_updates)
         refreshed = api_get_env_vars(api_key, args.service_id)
         verify_updates(refreshed, effective_updates)
+        if canonical_env is not None and args.update_canonical_after_apply:
+            canonical_env.update(effective_updates)
+            write_env_file(baseline_path, canonical_env)
+            print(f"canonical_update: wrote merged keys to {baseline_path}")
         print("apply_status: success")
         print(f"verified_keys: {', '.join(sorted(effective_updates))}")
 
@@ -335,7 +412,7 @@ def main() -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     except requests.RequestException as exc:
-        print(f"error: network request failed: {exc}", file=sys.stderr)
+        print("error: network request failed (details redacted)", file=sys.stderr)
         return 1
 
 
