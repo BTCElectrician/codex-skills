@@ -17,6 +17,10 @@ universal filename or duplicate repository doctrine.
   only the files this closeout owns.
 - Housekeeping does not authorize implementation, release, deployment,
   destructive cleanup, or another repository's writes.
+- Default to no new document. Keep requested deliverables, operating decisions
+  and constraints that code cannot reveal, and the minimum unfinished-work
+  handoff. Inspect live code when implementation behavior needs explaining;
+  verify deployed behavior separately.
 
 ## Closeout
 
@@ -33,9 +37,10 @@ universal filename or duplicate repository doctrine.
    When several surfaces exist, preserve their declared roles and avoid
    repeating the same state across them.
 3. If instructions conflict, a declared handoff is missing, or canonical
-   ownership remains ambiguous after applying declared precedence, do not
-   guess or rewrite the disputed surfaces. Report the conflict as the
-   remaining blocker and ask the user to identify the authority.
+   ownership remains ambiguous after applying declared precedence, inspect
+   the relevant live evidence and owner rules to resolve it. If authority
+   remains genuinely disputed, do not guess or rewrite those surfaces; report
+   the conflict and ask the user to identify the authority.
 4. Update an existing `AGENTS.md` only when a durable operating rule,
    boundary, canonical command, first-read path, or ownership fact actually
    changed. Do not create one solely to complete housekeeping.
@@ -53,7 +58,11 @@ universal filename or duplicate repository doctrine.
    leave its compact return record only when the outcome changed information
    that surface owns. Do not write upstream or into another repository unless
    that write is explicitly in scope.
-9. Run the repository's documented focused checks for changed agent surfaces,
+9. Within the existing task authorization, remove only declared disposable
+   task outputs and stop task-owned temporary processes no longer needed.
+   Retain issued or unique evidence and preserve unrelated work. Routine
+   closeout is not a broad documentation audit or blanket deletion authority.
+10. Run the repository's documented focused checks for changed agent surfaces,
    plus `git diff --check` when available.
 
 If evidence is incomplete, write `unknown` or name the unverified boundary.
