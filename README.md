@@ -11,40 +11,47 @@ should only be run when the current task explicitly calls for that workflow.
 
 ## Canonical homes (avoid drift)
 
-Copy-based installs fork silently, so every skill has exactly one canonical
-home, named in its `SOURCE.md`. Skills owned by a repo (e.g.
-`hq-research-specialist` → `ohmni-hq/.codex/skills/`) are only *distributed*
-from this vault: edit the canonical copy, then re-copy it here. Skills with
-no other home (`flask-redundancy-audit`, `flask-redundancy-refactor-p0`,
-`render-env-safe-update`) are canonical in this vault. When installing into a
-repo, keep the skill's `SOURCE.md` so the next agent knows where edits belong.
+Each retained shared skill has one authoritative source. HQ owns the registry
+at `/Users/collin/Desktop/ohmni-hq/ops/skill_sources.json`; consult it before
+editing or installing a skill. HQ-owned sources live in `ohmni-hq/skills/`,
+a maintained directory outside agent discovery. This vault remains the owner
+of `skills/repo-housekeeping/`, `skills/render-env-safe-update/`,
+`skills/construction-etl-hardening-loop/`, and
+`skills/oracle-v3-review-workbook-hardening/`. Edit these sources here.
+
+Purchased/private upstream skills and private overrides stay in their registered
+private location outside public Git. Vendor-managed packages retain vendor
+ownership. Do not copy that content into this public vault or HQ. Historical
+source records are provenance; the current HQ registry governs maintained paths.
 
 ## Maintained shared installations on this workstation
 
-For shared skills listed in `/Users/collin/Desktop/ohmni-hq/ops/skill_sources.json`,
-edit the listed source and use HQ `ops/skills_guard.sh --apply --skill <name>`.
-The default `--check` is read-only. This keeps Codex and Claude installations
-aligned, preserves replaced copies, and refuses unreviewed local edits.
-`render-env-safe-update` is managed this way; its source stays in this vault.
-Prefer global installations for shared skills in future projects. The manual
-copy instructions below are for unregistered or genuinely project-local skills;
-register maintained copies if they need ongoing synchronization. Keep licensed
-third-party overrides private and outside this public vault.
+Claude Code and Codex reach shared skills through direct per-skill global
+symlinks: `~/.claude/skills/<name>` and `~/.codex/skills/<name>` both point to the
+registered authoritative source. These links provide access without independent
+copies. Do not copy shared skills into user or repository discovery directories.
+Global availability preserves the owning workspace's execution and approval rules.
 
-## Install a skill in a repo (.codex/skills)
+Locate a maintained source from any workspace with the read-only HQ resolver:
 
-1. Create the folder .codex/skills at the root of the target repo.
-2. Copy a skill folder into it. Example:
+```bash
+python3 /Users/collin/Desktop/ohmni-hq/ops/skill_sync.py --resolve <name>
+```
 
-   cp -R /path/to/codex-skills/skills/flask-redundancy-audit /path/to/repo/.codex/skills/
+After editing a registered source, use the targeted HQ guard from HQ:
 
-3. If the skill does not appear, restart Codex CLI or the VS Code extension.
+```bash
+cd /Users/collin/Desktop/ohmni-hq
+bash ops/skills_guard.sh --check --skill <name>
+bash ops/skills_guard.sh --apply --skill <name>
+```
 
-## Install skills globally (~/.codex/skills)
-
-1. Create ~/.codex/skills if it does not exist.
-2. Copy any skill folder into ~/.codex/skills.
-3. Restart Codex CLI and the VS Code extension if the skill is not detected.
+Use `--apply` only for the intended skill. The maintained registry and
+`/Users/collin/Desktop/ohmni-hq/docs/AVAILABLE_AGENT_SKILLS.md` describe source
+ownership, discovery modes, updates, and restoration. Reload or start a fresh
+agent task after changing instructions already loaded in memory. Historical and
+secondary worktree discovery entries are outside this migration; global links
+do not override or deduplicate their repository definitions.
 
 ## Use a skill
 
@@ -71,10 +78,7 @@ Invoke it naturally:
 Do the repo housekeeping and bring the agent docs current.
 ```
 
-Install the same folder at the project or user skill location supported by
-your agent:
-
-- Codex: `.codex/skills/repo-housekeeping/`
-- Claude Code: `.claude/skills/repo-housekeeping/`
-- Cursor: `.cursor/skills/repo-housekeeping/`; Cursor also discovers Codex and
-  Claude skill directories.
+Use the registered global link for your agent; both Claude Code and Codex
+resolve `repo-housekeeping` directly to this vault's authoritative folder.
+Consult the HQ registry for maintained access paths rather than creating
+project copies. Other agents' installations are outside this migration.
