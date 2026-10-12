@@ -3,9 +3,9 @@ name: construction-etl-hardening-loop
 description: Harden construction-document extraction when source content is missing, misassigned, or silently omitted. Use for cross-trade drawing, schedule, table, and final-query failures. Preserve model-native semantics and generic evidence capture; do not use this skill as authority for Oracle V3 workbook procedures or as a reason to add trade-specific parsers.
 metadata:
   short-description: Evidence-bound model-native construction extraction
-  version: "2.0.0"
+  version: "2.1.0"
   owner: "BTCElectrician/codex-skills"
-  last-verified: "2026-08-29"
+  last-verified: "2026-10-12"
   applies-to: "Cross-trade construction extraction and compiler hardening"
 ---
 
@@ -30,6 +30,10 @@ Require complete accounting, not a dishonest promise of perfect semantic extract
 - a correction is not closed until the reusable path is fixed and tested, the issue is proven false or stale, or the unresolved ambiguity is preserved with evidence.
 
 Do not add a new public state merely to satisfy this skill.
+Complete accounting does not require every possible fact to become a typed
+record before a user can ask a question. Keep authorized source access usable
+when semantic compilation is incomplete; make the answer's evidence and limits
+explicit. This is not permission to bypass publication or write gates.
 
 ## Model-native boundary
 
@@ -39,6 +43,20 @@ Model-native does not mean logic-free. Keep the split outcome-based:
 - qualified models may perform the cross-trade semantic reading and structured extraction;
 - validators test completeness and support; they do not invent missing source meaning; and
 - typed trade projections follow lossless generic capture rather than replacing it.
+
+Literal transcription and supported interpretation are different outputs.
+Preserve the printed cells unchanged, while allowing a qualified model to
+propose relationships or calculations separately, with source references,
+assumptions and unresolved alternatives. A no-inference transcription prompt
+must not become a blanket ban on semantic extraction. Do not invent geometry
+or silently promote an interpretation into printed truth.
+
+Deterministic output is a candidate, not independent ground truth. Require
+field-local source support before an override; record both candidates and the
+reason. A partial native read must not erase a populated field it did not
+observe. Plausibility, familiar values, majority agreement and a parser's empty
+cell do not by themselves prove what a source prints. Keep unsupported or
+disputed values available as review evidence without serving them as settled.
 
 Before adding parser logic, test whether the model received the complete, legible source region with its headings, entries, notes, and geometry. A stronger model cannot recover evidence that routing, cropping, truncation, or candidate selection withheld.
 
@@ -54,6 +72,13 @@ Run enough of the complete compiler to keep downstream failures visible, then re
 4. table structure and deterministic normalization;
 5. occurrence grouping, relationships, authority, and conflict handling;
 6. retrieval, projection, and final presentation.
+
+Trace the actual request and every representation serving the affected fact:
+source region -> untouched provider response -> adapted/normalized data ->
+final consumer records. A pre-normalizer sidecar may already contain repairs;
+label it honestly if the original provider response is unavailable. Check
+parallel record types for inconsistent values and lost units, relationships or
+review conditions; a correct primary record does not certify its duplicates.
 
 The repair mechanism remains open. The correct fix may be a generic model input, profile, prompt, region builder, validator, normalizer, or projection change. "Fix upstream" does not mean "write another parser."
 
@@ -75,13 +100,22 @@ When typed semantics are not supportable, retain the literal cell grid or bounde
 ## Proof proportional to the claim
 
 - Reproduce the demonstrated failure on source-authorized evidence or an honest focused fixture.
-- Add at least one positive and one suppression or abstention control.
+- For a changed behavioral boundary, add a relevant positive and failure/suppression/abstention control; documentation-only clarification does not require a new extraction experiment.
+- Name what each validator observes and show that it rejects a relevant failure. A row count, plausible value, arithmetic agreement or valid JSON cannot certify descriptions, notes or complete semantics. Escalation gated on those checks inherits their blind spots.
 - For a generic or cross-trade claim, exercise materially different schedule shapes and trades; one project or one selected answer set is not universal proof.
 - Compare with any proven incumbent capability that the successor promises to preserve.
 - Run representative operator questions through the final delivered surface, with the correct source/page/region and an honest abstention when unsupported.
 - Use an unseen project only after the generic repair is frozen. Preserve failed holdouts as failed evidence; do not tune their validator or hidden key into a pass.
 
 Prefer the smallest focused test and repository-required gate that falsify the changed boundary. Do not create packets, councils, or review artifacts that do not improve the working capability.
+
+Treat image sizing, token/reasoning limits, model allowlists and escalation
+thresholds as replaceable, evidence-backed policies. Inspect the actual input,
+provider completion status and reasoning/output usage before blaming a model
+or raising a budget. Reconsider a restriction when current evidence falsifies
+its rationale; a newer model name alone is insufficient. Saved-output replay
+can prove processing changes, not the accuracy of a new prompt or image crop.
+This skill grants no spending, fresh holdout use or production-data authority.
 
 ## Residual recovery
 
