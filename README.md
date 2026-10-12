@@ -82,3 +82,11 @@ Use the registered global link for your agent; both Claude Code and Codex
 resolve `repo-housekeeping` directly to this vault's authoritative folder.
 Consult the HQ registry for maintained access paths rather than creating
 project copies. Other agents' installations are outside this migration.
+
+## Workflow waste audit
+
+[`workflow-waste-audit`](skills/workflow-waste-audit/README.md) audits repeated
+CI, test, build, deployment, and artifact work in one repository. It defaults
+to read-only keep/change/investigate recommendations, preserves necessary
+protections, and distinguishes faster feedback from lower billed usage.
+The public skill includes installation guidance and three synthetic examples.
