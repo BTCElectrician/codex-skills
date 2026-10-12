@@ -1,0 +1,3 @@
+interface:
+  display_name: "Workflow Waste Audit"
+  short_description: "Audit repeated work without weakening protections"
